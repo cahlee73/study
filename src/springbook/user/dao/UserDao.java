@@ -11,9 +11,7 @@ import springbook.user.domain.User;
 public class UserDao {
 	
 	public void add(User user) throws ClassNotFoundException, SQLException {
-		Class.forName("com.mysql.jdbc.Driver");
-		Connection c = DriverManager.getConnection(
-				"jdbc:mysql://ctrl0703.iptime.org:3306/spring", "root", "32Armyband");
+		Connection c = getConnection();
 		
 		PreparedStatement ps = c.prepareStatement(
 				"INSERT INTO users (id, name, password) VALUES (?, ?, ?)");
@@ -27,10 +25,15 @@ public class UserDao {
 		c.close();
 	}
 	
-	public User get(String id) throws ClassNotFoundException, SQLException {
+	private Connection getConnection() throws SQLException, ClassNotFoundException {
 		Class.forName("com.mysql.jdbc.Driver");
 		Connection c = DriverManager.getConnection(
 				"jdbc:mysql://ctrl0703.iptime.org:3306/spring", "root", "32Armyband");
+		return c;
+	}
+
+	public User get(String id) throws ClassNotFoundException, SQLException {
+		Connection c = getConnection();
 		
 		PreparedStatement ps = c.prepareStatement(
 				"SELECT * FROM users WHERE ID = ?");
