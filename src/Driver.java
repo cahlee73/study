@@ -10,18 +10,18 @@ public class Driver {
 		
 		User user = new User();
 		user.setId("ctrl0703");
-		user.setName("ÀÌÃ¢Èñ");
+		user.setName("ì´ì°½í¬");
 		user.setPassword("32Armyband");
 		
 		dao.add(user);
 		
-		System.out.println(user.getId() + " µî·Ï ¼º°ø");
+		System.out.println(user.getId() + " ë“±ë¡ ì„±ê³µ");
 		
 		User user2 = dao.get(user.getId());
 		System.out.println(user2.getName());
 		System.out.println(user2.getPassword());
 		
-		System.out.println(user2.getId() + " Á¶È¸ ¼º°ø");
+		System.out.println(user2.getId() + " ì¡°íšŒ ì„±ê³µ");
 	}
 
 }
