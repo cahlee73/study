@@ -1,104 +1,65 @@
 package springbook.user.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import springbook.user.domain.User;
 
 public class UserDao {
-	private JdbcContext jdbcContext;
+	private JdbcTemplate jdbcTemplate;
 	private DataSource dataSource;
 
 	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.dataSource = dataSource;
-	}
-
-	public void setJdbcContext(JdbcContext jdbcContext) {
-		this.jdbcContext = jdbcContext;
 	}
 	
 	public void add(final User user) throws ClassNotFoundException, SQLException {
-		this.jdbcContext.executeSql(
+		this.jdbcTemplate.update(
 				"INSERT INTO users (id, name, password) VALUES (?, ?, ?)",
-				user.getId(),
-				user.getName(),
-				user.getPassword());
+				user.getId(), user.getName(), user.getPassword());
 	}
 
 	public User get(String id) throws ClassNotFoundException, SQLException {
-		Connection c = dataSource.getConnection();
-		
-		PreparedStatement ps = c.prepareStatement(
-				"SELECT * FROM users WHERE ID = ?");
-		ps.setString(1, id);
-		
-		ResultSet rs = ps.executeQuery();
-		User user = null;
-		if(rs.next()) {
-			user = new User();
-			user.setId(rs.getString("id"));
-			user.setName(rs.getString("name"));
-			user.setPassword(rs.getString("password"));
-		}
-		
-		if(user == null) throw new EmptyResultDataAccessException(1);
-		
-		rs.close();
-		ps.close();
-		c.close();
-		
-		return user;
+		return this.jdbcTemplate.queryForObject("SELECT * FROM users WHERE ID = ?",
+				new Object[] {id},
+				new RowMapper<User>() {
+					@Override
+					public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+						User user = new User();
+						user.setId(rs.getString("id"));
+						user.setName(rs.getString("name"));
+						user.setPassword(rs.getString("password"));
+						return user;
+					}
+		});
 	}
 	
 	public void deleteAll() throws ClassNotFoundException, SQLException {
-		this.jdbcContext.executeSql("DELETE FROM users");
+		this.jdbcTemplate.update("DELETE FROM users");
 	}
 
 	public int getCount() throws ClassNotFoundException, SQLException {
-		Connection c = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		int result = 0;
-		
-		try {
-			c = dataSource.getConnection();
-			ps = c.prepareStatement("SELECT COUNT(*) FROM users");
-			rs = ps.executeQuery();
-			rs.next();
-			
-			result = rs.getInt(1);
-		} catch(SQLException e) {
-			throw e;
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch(SQLException e) {
-					
-				}
-			}
-			if (ps != null) {
-				try {
-					ps.close();
-				} catch(SQLException e) {
-					
-				}
-			}
-			if (c != null) {
-				try {
-					c.close();
-				} catch(SQLException e) {
-					
-				}
-			}
-		} 
-		
-		return result;
+		return this.jdbcTemplate.queryForInt("SELECT COUNT(*) FROM users");
+	}
+
+	public List<User> getAll() {
+		return this.jdbcTemplate.query("SELECT * FROM users ORDER BY id",
+				new RowMapper<User>() {
+					@Override
+					public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+						User user = new User();
+						user.setId(rs.getString("id"));
+						user.setName(rs.getString("name"));
+						user.setPassword(rs.getString("password"));
+						return user;
+					}
+		});
 	}
 }
