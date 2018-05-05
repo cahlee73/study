@@ -24,18 +24,11 @@ public class UserDao {
 	}
 	
 	public void add(final User user) throws ClassNotFoundException, SQLException {
-		this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-			@Override
-			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
-				PreparedStatement ps = c.prepareStatement(
-						"INSERT INTO users (id, name, password) VALUES (?, ?, ?)");
-				ps.setString(1, user.getId());
-				ps.setString(2, user.getName());
-				ps.setString(3, user.getPassword());
-				
-				return ps;
-			}
-		});
+		this.jdbcContext.executeSql(
+				"INSERT INTO users (id, name, password) VALUES (?, ?, ?)",
+				user.getId(),
+				user.getName(),
+				user.getPassword());
 	}
 
 	public User get(String id) throws ClassNotFoundException, SQLException {
@@ -64,14 +57,9 @@ public class UserDao {
 	}
 	
 	public void deleteAll() throws ClassNotFoundException, SQLException {
-		this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-			@Override
-			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
-				return c.prepareStatement("DELETE FROM users");
-			}
-		});
+		this.jdbcContext.executeSql("DELETE FROM users");
 	}
-	
+
 	public int getCount() throws ClassNotFoundException, SQLException {
 		Connection c = null;
 		PreparedStatement ps = null;
