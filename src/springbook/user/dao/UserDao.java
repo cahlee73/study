@@ -13,11 +13,19 @@ import springbook.user.domain.User;
 
 public class UserDao {
 	private JdbcTemplate jdbcTemplate;
-	private DataSource dataSource;
+	private RowMapper<User> userMapper = new RowMapper<User>() {
+		@Override
+		public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+			User user = new User();
+			user.setId(rs.getString("id"));
+			user.setName(rs.getString("name"));
+			user.setPassword(rs.getString("password"));
+			return user;
+		};
+	};
 
 	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
-		this.dataSource = dataSource;
 	}
 	
 	public void add(final User user) throws ClassNotFoundException, SQLException {
@@ -28,17 +36,7 @@ public class UserDao {
 
 	public User get(String id) throws ClassNotFoundException, SQLException {
 		return this.jdbcTemplate.queryForObject("SELECT * FROM users WHERE ID = ?",
-				new Object[] {id},
-				new RowMapper<User>() {
-					@Override
-					public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-						User user = new User();
-						user.setId(rs.getString("id"));
-						user.setName(rs.getString("name"));
-						user.setPassword(rs.getString("password"));
-						return user;
-					}
-		});
+				new Object[] {id}, userMapper);
 	}
 	
 	public void deleteAll() throws ClassNotFoundException, SQLException {
@@ -50,16 +48,6 @@ public class UserDao {
 	}
 
 	public List<User> getAll() {
-		return this.jdbcTemplate.query("SELECT * FROM users ORDER BY id",
-				new RowMapper<User>() {
-					@Override
-					public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-						User user = new User();
-						user.setId(rs.getString("id"));
-						user.setName(rs.getString("name"));
-						user.setPassword(rs.getString("password"));
-						return user;
-					}
-		});
+		return this.jdbcTemplate.query("SELECT * FROM users ORDER BY id", this.userMapper );
 	}
 }
