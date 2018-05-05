@@ -28,22 +28,22 @@ public class UserDao {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 	
-	public void add(final User user) throws ClassNotFoundException, SQLException {
+	public void add(final User user) {
 		this.jdbcTemplate.update(
 				"INSERT INTO users (id, name, password) VALUES (?, ?, ?)",
 				user.getId(), user.getName(), user.getPassword());
 	}
 
-	public User get(String id) throws ClassNotFoundException, SQLException {
+	public User get(String id) {
 		return this.jdbcTemplate.queryForObject("SELECT * FROM users WHERE ID = ?",
 				new Object[] {id}, userMapper);
 	}
 	
-	public void deleteAll() throws ClassNotFoundException, SQLException {
+	public void deleteAll() {
 		this.jdbcTemplate.update("DELETE FROM users");
 	}
 
-	public int getCount() throws ClassNotFoundException, SQLException {
+	public int getCount() {
 		return this.jdbcTemplate.queryForInt("SELECT COUNT(*) FROM users");
 	}
 
